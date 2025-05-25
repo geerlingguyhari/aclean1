@@ -1,0 +1,169 @@
+---
+# 1. Namespace for KEDA
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: create-keda-namespace
+  namespace: rhacm-policies
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: keda
+---
+# 2. Install KEDA Operator
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-keda-operator
+  namespace: rhacm-policies
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: operators.coreos.com/v1
+        kind: OperatorGroup
+        metadata:
+          name: keda-operator-group
+          namespace: keda
+        spec:
+          targetNamespaces:
+            - keda
+    - objectDefinition:
+        apiVersion: operators.coreos.com/v1alpha1
+        kind: Subscription
+        metadata:
+          name: keda
+          namespace: keda
+        spec:
+          channel: stable
+          name: keda
+          source: redhat-operators
+          sourceNamespace: openshift-marketplace
+---
+# 3. Deploy ScaledObject in user namespace
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: deploy-keda-scaledobject
+  namespace: rhacm-policies
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: keda.sh/v1alpha1
+        kind: ScaledObject
+        metadata:
+          name: cpu-scaler
+          namespace: example-user-ns
+        spec:
+          scaleTargetRef:
+            name: my-app
+          minReplicaCount: 1
+          maxReplicaCount: 10
+          triggers:
+            - type: cpu
+              metadata:
+                type: Utilization
+                value: "60"
+---
+# 4. Role for KEDA management in namespace
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: keda-user-role
+  namespace: rhacm-policies
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        kind: Role
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: keda-user
+          namespace: example-user-ns
+        rules:
+          - apiGroups: ["keda.sh"]
+            resources: ["scaledobjects", "triggerauthentications"]
+            verbs: ["create", "delete", "get", "list", "watch", "update", "patch"]
+          - apiGroups: ["autoscaling"]
+            resources: ["horizontalpodautoscalers"]
+            verbs: ["create", "get", "list", "watch", "update", "patch", "delete"]
+          - apiGroups: [""]
+            resources: ["pods", "services"]
+            verbs: ["get", "list", "watch"]
+---
+# 5. RoleBinding for user access
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: keda-user-rolebinding
+  namespace: rhacm-policies
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        kind: RoleBinding
+        apiVersion: rbac.authorization.k8s.io/v1
+        metadata:
+          name: keda-user-binding
+          namespace: example-user-ns
+        subjects:
+          - kind: User
+            name: user1@example.com
+            apiGroup: rbac.authorization.k8s.io
+        roleRef:
+          kind: Role
+          name: keda-user
+          apiGroup: rbac.authorization.k8s.io
+---
+# 6. PlacementRule - target clusters
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: target-keda-clusters
+  namespace: rhacm-policies
+spec:
+  clusterSelector:
+    matchExpressions:
+      - key: name
+        operator: In
+        values:
+          - dev-cluster
+          - staging-cluster
+---
+# 7. PlacementBinding - apply policies
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: bind-keda-policies
+  namespace: rhacm-policies
+placementRef:
+  name: target-keda-clusters
+  kind: PlacementRule
+  apiGroup: apps.open-cluster-management.io
+subjects:
+  - name: create-keda-namespace
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+  - name: install-keda-operator
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+  - name: deploy-keda-scaledobject
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+  - name: keda-user-role
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+  - name: keda-user-rolebinding
+    kind: Policy
+    apiGroup: policy.open-cluster-management.io
+

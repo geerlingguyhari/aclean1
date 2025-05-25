@@ -1,0 +1,319 @@
+1. Create Policies for KEDA Installation
+1.1 Create Namespace for KEDA
+
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: keda-namespace
+  namespace: open-cluster-management
+  annotations:
+    policy.open-cluster-management.io/standards: N/A
+    policy.open-cluster-management.io/categories: N/A
+    policy.open-cluster-management.io/controls: N/A
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: keda-namespace
+        spec:
+          remediationAction: enforce
+          severity: low
+          namespaceSelector:
+            exclude: ["kube-*"]
+            include: ["*"]
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: keda
+
+@@@1.2 Install KEDA Operator@@@@
+--------------------------------
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: install-keda-operator
+  namespace: open-cluster-management
+  annotations:
+    policy.open-cluster-management.io/standards: N/A
+    policy.open-cluster-management.io/categories: N/A
+    policy.open-cluster-management.io/controls: N/A
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: install-keda-operator
+        spec:
+          remediationAction: enforce
+          severity: high
+          namespaceSelector:
+            include: ["keda"]
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operators.coreos.com/v1
+                kind: OperatorGroup
+                metadata:
+                  name: keda-operator
+                  namespace: keda
+                spec:
+                  targetNamespaces:
+                  - keda
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: operators.coreos.com/v1alpha1
+                kind: Subscription
+                metadata:
+                  name: keda-operator
+                  namespace: keda
+                spec:
+                  channel: stable
+                  installPlanApproval: Automatic
+                  name: keda-operator
+                  source: redhat-operators
+                  sourceNamespace: openshift-marketplace
+                  startingCSV: keda-operator.v2.0.0
+
+@@@1.3 Create KEDA Controller@@@
+----------------------------------
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: create-keda-controller
+  namespace: open-cluster-management
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: create-keda-controller
+        spec:
+          remediationAction: enforce
+          severity: high
+          namespaceSelector:
+            include: ["keda"]
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: keda.sh/v1alpha1
+                kind: KedaController
+                metadata:
+                  name: keda
+                  namespace: keda
+                spec:
+                  watchNamespace: ""
+
+@@@2. Create Placement for KEDA Policies@@@@@
+=============================================
+apiVersion: apps.open-cluster-management.io/v1
+kind: PlacementRule
+metadata:
+  name: keda-placement
+  namespace: open-cluster-management
+spec:
+  clusterConditions:
+    - status: "True"
+      type: ManagedClusterConditionAvailable
+  clusterSelector:
+    matchExpressions:
+      - {key: environment, operator: In, values: ["dev", "stage", "prod"]}
+
+@@@3.Bind Policies to Placement @@@@
+===================================
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
+metadata:
+  name: bind-keda-policies
+  namespace: open-cluster-management
+placementRef:
+  apiGroup: apps.open-cluster-management.io
+  kind: PlacementRule
+  name: keda-placement
+subjects:
+  - apiGroup: policy.open-cluster-management.io
+    kind: Policy
+    name: keda-namespace
+  - apiGroup: policy.open-cluster-management.io
+    kind: Policy
+    name: install-keda-operator
+  - apiGroup: policy.open-cluster-management.io
+    kind: Policy
+    name: create-keda-controller
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
+4. Create Role Aggregations for End Users
+4.1 ClusterRole for KEDA Admin (for cluster admins)
+===================================================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: keda-admin
+rules:
+- apiGroups: ["keda.sh"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["services", "endpoints", "pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["autoscaling"]
+  resources: ["horizontalpodautoscalers"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+4.2 Namespace-level Role for End Users
+=====================================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: keda-user
+  namespace: <user-namespace>
+rules:
+- apiGroups: ["keda.sh"]
+  resources: ["scaledobjects", "scaledjobs", "triggerauthentications"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""]
+  resources: ["services", "endpoints", "pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "watch"]
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+4.3 RoleBinding for End Users
+=============================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: keda-user-binding
+  namespace: <user-namespace>
+subjects:
+- kind: User
+  name: <username>
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: keda-user
+  apiGroup: rbac.authorization.k8s.io
+
+@@@@ 4.4 Aggregated ClusterRole for Viewing KEDA Resources @@@@
+==============================================================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: view-keda
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.k8s.io/aggregate-to-view: "true"
+rules: [] # Rules are automatically filled by the controller manager
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aggregate-keda-to-view
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+rules:
+- apiGroups: ["keda.sh"]
+  resources: ["scaledobjects", "scaledjobs", "triggerauthentications"]
+  verbs: ["get", "list", "watch"]
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+5. Policy for End User Namespace Configuration
+Create a policy that allows end users to create KEDA resources in their namespaces:
+==================================================================
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: allow-keda-in-user-namespaces
+  namespace: open-cluster-management
+spec:
+  remediationAction: enforce
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: allow-keda-in-user-namespaces
+        spec:
+          remediationAction: enforce
+          severity: medium
+          namespaceSelector:
+            exclude: ["kube-*", "openshift-*", "keda"]
+            include: ["*"]
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: rbac.authorization.k8s.io/v1
+                kind: Role
+                metadata:
+                  name: keda-user
+                rules:
+                - apiGroups: ["keda.sh"]
+                  resources: ["scaledobjects", "scaledjobs", "triggerauthentications"]
+                  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+                - apiGroups: [""]
+                  resources: ["services", "endpoints", "pods"]
+                  verbs: ["get", "list", "watch"]
+                - apiGroups: ["apps"]
+                  resources: ["deployments"]
+                  verbs: ["get", "list", "watch"]
+
+========================================================================
+Verify the installation:
+
+# Check KEDA operator status
+oc get subscription -n keda
+
+# Check KEDA controller status
+oc get pods -n keda
+
+# Verify KEDA CRDs are installed
+oc get crd | grep keda.sh
+
+====================================================================
+6. Role Aggregations for Custom Metrics
+6.1 ClusterRole for Metrics Providers
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: custom-metrics-provider-admin
+rules:
+- apiGroups: ["external.metrics.k8s.io"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["metrics.k8s.io"]
+  resources: ["pods", "nodes"]
+  verbs: ["get", "list", "watch"]
+
+6.2 Namespace-level Role for End Users
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: custom-metrics-user
+  namespace: <user-namespace>
+rules:
+- apiGroups: ["external.metrics.k8s.io"]
+  resources: ["*"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: ["metrics.k8s.io"]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
