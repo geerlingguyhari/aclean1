@@ -1,0 +1,16 @@
+clusters.txt format example:
+arduino
+Copy
+Edit
+https://api.cluster1.example.com:6443
+https://api.cluster2.example.com:6443
+https://api.cluster3.example.com:6443
+
+ Example Output Files:
+python-repl
+Copy
+Edit
+tia_maintainers_2025-06-14_1602.csv
+tia_maintainers_2025-06-14_1545.csv
+...
+Older files beyond KEEP_LATEST count will be automatically deleted.
