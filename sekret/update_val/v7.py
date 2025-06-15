@@ -1,0 +1,187 @@
+import subprocess
+import json
+import base64
+import os
+import csv
+import getpass
+import binascii
+import shutil
+import tempfile
+import logging
+from pathlib import Path
+from datetime import datetime
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
+
+OUTPUT_FILE = 'output/validated.csv'
+LOG_FILE = 'output/audit.log'
+THREADS_PER_CLUSTER = 5
+
+# Global credentials (used inside multiprocessing)
+oc_username = ''
+oc_password = ''
+serviceid_to_check = ''
+user_password = ''
+
+def setup_logger():
+    Path('output').mkdir(exist_ok=True)
+    logging.basicConfig(
+        filename=LOG_FILE,
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+    logging.info("🔍 Audit session started")
+
+def mask(value):
+    if not value:
+        return 'None'
+    return value[:3] + '****' + value[-2:]
+
+def run_cmd(args, kubeconfig=None):
+    cmd = args + (["--kubeconfig", kubeconfig] if kubeconfig else [])
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    return result.stdout.strip(), result.stderr.strip()
+
+def decode_b64(data, nested=False):
+    try:
+        decoded = base64.b64decode(data).decode('utf-8')
+        if nested:
+            try:
+                inner = base64.b64decode(decoded).decode('utf-8')
+                return inner
+            except Exception:
+                pass
+        return decoded
+    except (binascii.Error, UnicodeDecodeError):
+        return None
+
+def check_auth(auth_str):
+    decoded = decode_b64(auth_str)
+    if decoded:
+        parts = decoded.strip().split(':', 1)
+        if len(parts) == 2:
+            uid, pwd = parts
+            if uid.strip().lower() == serviceid_to_check.strip().lower() and pwd.strip() == user_password.strip():
+                return uid, 'yes'
+    return '', 'no'
+
+def match_credentials(decoded_json):
+    if isinstance(decoded_json, dict):
+        if 'auth' in decoded_json:
+            sid, match = check_auth(decoded_json['auth'])
+            if match == 'yes':
+                return sid, match
+        if (
+            decoded_json.get('username', '').strip().lower() == serviceid_to_check.strip().lower()
+            and decoded_json.get('password', '').strip() == user_password.strip()
+        ):
+            return decoded_json.get('username'), 'yes'
+        if isinstance(decoded_json.get('auths'), dict):
+            for entry in decoded_json['auths'].values():
+                sid, match = match_credentials(entry)
+                if match == 'yes':
+                    return sid, match
+    return '', 'no'
+
+def process_secret(secret):
+    secret_type = secret.get('type')
+    metadata = secret.get('metadata', {})
+    data = secret.get('data', {})
+    namespace = metadata.get('namespace')
+    name = metadata.get('name')
+
+    sid_found, matched = '', 'no'
+
+    for _, b64_val in data.items():
+        decoded = decode_b64(b64_val, nested=True)
+        if not decoded:
+            continue
+        try:
+            inner_json = json.loads(decoded)
+            sid_found, matched = match_credentials(inner_json)
+            if matched == 'yes':
+                break
+        except json.JSONDecodeError:
+            continue
+
+    return namespace, name, secret_type, sid_found, matched
+
+def process_namespace(kubeconfig, cluster_url, ns):
+    logging.info(f"🔎 Scanning namespace '{ns}' on cluster '{cluster_url}'")
+    rows = []
+    secret_out, _ = run_cmd(["oc", "get", "secrets", "-n", ns, "-o", "json"], kubeconfig)
+    try:
+        secrets = json.loads(secret_out).get('items', [])
+    except Exception:
+        return rows
+
+    for secret in secrets:
+        namespace, name, stype, sid, match = process_secret(secret)
+        if sid:
+            rows.append([cluster_url, namespace, name, stype, sid, match])
+            logging.info(f"✅ Match found in secret '{name}' (ns: {namespace}, type: {stype})")
+    return rows
+
+def process_cluster(cluster_url):
+    temp_dir = tempfile.mkdtemp(prefix="kubeconfig_")
+    kubeconfig_path = os.path.join(temp_dir, "config")
+    rows = []
+
+    masked_cluster = cluster_url.replace("https://", "").split(".")[0]
+
+    try:
+        subprocess.run(
+            ["oc", "login", "-u", oc_username, "-p", oc_password, cluster_url, "--insecure-skip-tls-verify", "--kubeconfig", kubeconfig_path],
+            check=True, capture_output=True
+        )
+        logging.info(f"🔐 Logged in to cluster '{masked_cluster}'")
+
+        result = subprocess.run(
+            ["oc", "--kubeconfig", kubeconfig_path, "get", "ns", "-o", "json"],
+            capture_output=True, text=True, check=True
+        )
+        namespaces = [ns["metadata"]["name"] for ns in json.loads(result.stdout).get("items", [])]
+
+        with ThreadPoolExecutor(max_workers=THREADS_PER_CLUSTER) as executor:
+            futures = [executor.submit(process_namespace, kubeconfig_path, cluster_url, ns) for ns in namespaces]
+            for future in as_completed(futures):
+                rows.extend(future.result())
+
+    except subprocess.CalledProcessError as e:
+        logging.error(f"❌ Failed on cluster {masked_cluster}: {e.stderr.decode()}")
+    finally:
+        shutil.rmtree(temp_dir)
+
+    return rows
+
+def main():
+    global oc_username, oc_password, serviceid_to_check, user_password
+    setup_logger()
+    Path('output').mkdir(exist_ok=True)
+
+    oc_username = input("Enter OpenShift username: ")
+    oc_password = getpass.getpass("Enter OpenShift password: ")
+    serviceid_to_check = input("Enter Service ID to validate: ")
+    user_password = getpass.getpass("Enter corresponding password: ")
+
+    logging.info(f"🔧 Running with user '{mask(oc_username)}' to search for service ID '{mask(serviceid_to_check)}'")
+
+    with open('clusters.txt') as f:
+        clusters = [line.strip() for line in f if line.strip()]
+
+    all_rows = []
+    with ProcessPoolExecutor() as executor:
+        results = executor.map(process_cluster, clusters)
+        for cluster_rows in results:
+            all_rows.extend(cluster_rows)
+
+    with open(OUTPUT_FILE, mode='w', newline='') as outcsv:
+        writer = csv.writer(outcsv)
+        writer.writerow(['Cluster URL', 'Namespace', 'Secret Name', 'Secret Type', 'Service ID Found', 'Password Match'])
+        writer.writerows(all_rows)
+
+    logging.info(f"📦 Audit complete. Results saved to '{OUTPUT_FILE}' and log saved to '{LOG_FILE}'")
+    print(f"\n✅ Validation completed. Output saved to {OUTPUT_FILE}\n📝 Log file saved to {LOG_FILE}")
+
+if __name__ == '__main__':
+    main()
+
