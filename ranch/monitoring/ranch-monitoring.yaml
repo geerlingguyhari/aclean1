@@ -1,0 +1,112 @@
+global:
+  systemDefaultRegistry: "<internal_registry>"
+
+alertmanager:
+  enabled: true
+  ingress:
+    enabled: true
+    hosts:
+      - alertmanager.example.com
+  alertmanagerSpec:
+    externalUrl: "https://alertmanager.example.com"
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: "<your-storage-class>"
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: "10Gi"
+
+prometheus:
+  ingress:
+    enabled: true
+    hosts:
+      - prometheus.example.com
+  prometheusSpec:
+    externalUrl: "https://prometheus.example.com"
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: "<your-storage-class>"
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: "50Gi"
+    retention: "15d"  # Retain metrics locally for 15 days
+    thanos:
+      create: true
+      image: "<internal_registry>/thanos/thanos:v0.35.1"
+      version: "v0.35.1"
+      logLevel: info
+      objectStorageConfig:
+        name: thanos-objstore-config
+        key: thanos.yaml
+
+grafana:
+  enabled: true
+  ingress:
+    enabled: true
+    hosts:
+      - grafana.example.com
+  url: "https://grafana.example.com"
+  persistence:
+    enabled: true
+    type: pvc
+    storageClassName: "<your-storage-class>"
+    accessModes: ["ReadWriteOnce"]
+    size: "10Gi"
+  dashboards:
+    enabled: true
+    customDashboards:
+      my-namespace-dashboard:
+        gnetId: 1860
+        datasource: Prometheus
+
+prometheus-node-exporter:
+  enabled: true
+
+thanos:
+  enabled: true
+  objstoreConfig: |
+    type: FILESYSTEM
+    config:
+      directory: /data/thanos
+  persistence:
+    enabled: true
+    storageClass: "<your-storage-class>"
+    accessModes: ["ReadWriteOnce"]
+    size: "100Gi"
+  compact:
+    enabled: true
+    persistence:
+      enabled: true
+      storageClass: "<your-storage-class>"
+      accessModes: ["ReadWriteOnce"]
+      size: "20Gi"
+  storegateway:
+    enabled: true
+    persistence:
+      enabled: true
+      storageClass: "<your-storage-class>"
+      accessModes: ["ReadWriteOnce"]
+      size: "20Gi"
+  query:
+    enabled: true
+  bucketweb:
+    enabled: true
+  ruler:
+    enabled: true
+    persistence:
+      enabled: true
+      storageClass: "<your-storage-class>"
+      accessModes: ["ReadWriteOnce"]
+      size: "20Gi"
+
+images:
+  alertmanager: "<internal_registry>/prometheus/alertmanager:v0.25.0"
+  prometheus: "<internal_registry>/prometheus/prometheus:v2.45.0"
+  grafana: "<internal_registry>/grafana/grafana:10.2.0"
+  nodeExporter: "<internal_registry>/prometheus/node-exporter:v1.6.0"
+  thanos: "<internal_registry>/thanos/thanos:v0.35.1"
+

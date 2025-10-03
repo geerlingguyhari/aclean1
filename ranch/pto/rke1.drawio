@@ -1,0 +1,427 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.1.2 Chrome/138.0.7204.243 Electron/37.4.0 Safari/537.36" version="28.1.2">
+  <diagram name="Page-1" id="zdP23MGmKvoArz4OWBMM">
+    <mxGraphModel dx="2246" dy="1654" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-1" value="HA/DR Design" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="752" y="1174" width="2924" height="128" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-2" value="Offline External Repositories" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1183" y="20" width="836" height="128" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-3" value="Registry Zone" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1059" y="608" width="569" height="128" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-4" value="Security Zone" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="2039" y="20" width="1872" height="128" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-5" value="Observability Zone" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="20" y="20" width="407" height="1104" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-6" value="Storage Zone" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="3515" y="996" width="795" height="128" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-7" value="Data Plane Zone" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1092" y="827" width="1120" height="298" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-8" value="Control Plane Zone" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="2232" y="608" width="999" height="516" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-9" value="Management Zone" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1493" y="239" width="1568" height="297" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-10" value="Rancher HA Management Plane" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="2149" y="264" width="260" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-11" value="HashiCorp Vault HA (Secrets Mgmt)" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="2713" y="432" width="260" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-12" value="RKE2 Control Plane (etcd quorum)" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="2749" y="633" width="260" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-13" value="Cilium CNI &amp; Network Policies" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="2267" y="1021" width="260" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-14" value="Cilium Hubble Observability" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="2577" y="1033" width="260" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-15" value="RKE2 Worker Nodes" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1248" y="852" width="199" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-16" value="NGINX Ingress" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1497" y="852" width="159" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-17" value="F5/HAProxy Load Balancer" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1450" y="1033" width="250" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-18" value="Cilium L3/L4/L7 Network Policies" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1904" y="1021" width="260" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-19" value="Longhorn CSI Storage" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="3550" y="1033" width="211" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-20" value="Longhorn Replica Strategy" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="3811" y="1033" width="247" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-21" value="Backup Targets" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="4108" y="1033" width="167" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-22" value="Prometheus Metrics" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="181" y="444" width="200" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-23" value="Alertmanager" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="140" y="57" width="157" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-24" value="Grafana Dashboards" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="67" y="276" width="203" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-25" value="ELK/EFK Log Collection" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="55" y="1033" width="227" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-26" value="RBAC Controls" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="2384" y="57" width="161" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-27" value="mTLS Encryption" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="3056" y="57" width="180" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-28" value="Image Signing &amp; Verification" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="2074" y="45" width="260" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-29" value="CIS Benchmark Hardening" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="3633" y="57" width="243" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-30" value="Audit Logging &amp; Retention" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="3285" y="57" width="247" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-31" value="Internal Image Registry (Harbor/Artifactory)" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1094" y="633" width="260" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-32" value="Helm Chart Mirror" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1404" y="645" width="189" height="54" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-33" value="Offline OS/Package Repositories" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1414" y="45" width="260" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-34" value="Secure Update &amp; Signature Verification" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1724" y="45" width="260" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-35" value="etcd Quorum for Control Plane" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="787" y="1199" width="260" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-36" value="Backup/Restore: Etcd, Vault, Longhorn, Rancher" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="2717" y="1199" width="260" height="78" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-37" value="" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="2917" y="879" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-38" value="" style="whiteSpace=wrap;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="2938" y="1060" as="geometry" />
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-39" value="API (TCP 6443) mTLS" style="curved=1;startArrow=none;endArrow=block;exitX=1;exitY=0.96;entryX=0;entryY=0.15;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-10" target="EC-11Qngtj6BY5DOfsQv-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2579" y="387" />
+              <mxPoint x="2579" y="608" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-40" value="" style="curved=1;startArrow=none;endArrow=none;exitX=0.59;exitY=1;entryX=-Infinity;entryY=-Infinity;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-12" target="EC-11Qngtj6BY5DOfsQv-37">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2917" y="736" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-41" value="Etcd client (TCP 2379)" style="curved=1;startArrow=none;endArrow=none;exitX=-Infinity;exitY=-Infinity;entryX=Infinity;entryY=Infinity;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-37" target="EC-11Qngtj6BY5DOfsQv-38">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2917" y="996" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-42" value="" style="curved=1;startArrow=none;endArrow=block;exitX=Infinity;exitY=Infinity;entryX=1;entryY=0.85;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-38" target="EC-11Qngtj6BY5DOfsQv-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="3189" y="996" />
+              <mxPoint x="3189" y="736" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-43" value="Kubelet (TCP 10250)" style="curved=1;startArrow=none;endArrow=block;exitX=0;exitY=0.84;entryX=1;entryY=0.42;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-12" target="EC-11Qngtj6BY5DOfsQv-15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2559" y="736" />
+              <mxPoint x="2559" y="827" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-44" value="Cilium (VXLAN/Direct Routing)" style="curved=1;startArrow=none;endArrow=block;exitX=1;exitY=0.73;entryX=0;entryY=0.28;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-15" target="EC-11Qngtj6BY5DOfsQv-13">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1914" y="951" />
+              <mxPoint x="1914" y="996" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-45" value="Longhorn CSI (TCP 9500)" style="curved=1;startArrow=none;endArrow=block;exitX=1;exitY=0.67;entryX=0;entryY=0.43;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-15" target="EC-11Qngtj6BY5DOfsQv-19">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2102" y="951" />
+              <mxPoint x="2102" y="996" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-46" value="Logs/metrics via Fluentd (TCP 5044)" style="curved=1;startArrow=none;endArrow=block;exitX=0.23;exitY=1;entryX=1;entryY=0.38;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-15" target="EC-11Qngtj6BY5DOfsQv-25">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1203" y="951" />
+              <mxPoint x="1203" y="996" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-47" value="Scrape metrics (TCP 9090)" style="curved=1;startArrow=none;endArrow=block;exitX=0.38;exitY=1;entryX=0;entryY=0.41;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-22" target="EC-11Qngtj6BY5DOfsQv-15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="223" y="535" />
+              <mxPoint x="223" y="827" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-48" value="Alert Push (TCP 9093)" style="curved=1;startArrow=none;endArrow=block;exitX=0.37;exitY=1;entryX=0.5;entryY=-0.01;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-23" target="EC-11Qngtj6BY5DOfsQv-24">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="169" y="148" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-49" value="Ingress HTTP(S) (TCP 80/443)" style="curved=1;startArrow=none;endArrow=block;exitX=0.37;exitY=1;entryX=0.41;entryY=0.01;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-16" target="EC-11Qngtj6BY5DOfsQv-17">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1523" y="951" />
+              <mxPoint x="1523" y="996" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-50" value="External to internal traffic" style="curved=1;startArrow=none;endArrow=block;exitX=0.74;exitY=0.01;entryX=0.83;entryY=1;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-17" target="EC-11Qngtj6BY5DOfsQv-16">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1717" y="996" />
+              <mxPoint x="1717" y="951" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-51" value="Secrets requests (TCP 8200) Vault API" style="curved=1;startArrow=none;endArrow=block;exitX=1;exitY=0.79;entryX=0.33;entryY=0;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-10" target="EC-11Qngtj6BY5DOfsQv-11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2750" y="387" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-52" value="Cert management and trust" style="curved=1;startArrow=none;endArrow=block;exitX=0.31;exitY=1;entryX=0.22;entryY=0;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-11" target="EC-11Qngtj6BY5DOfsQv-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2760" y="535" />
+              <mxPoint x="2760" y="608" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-53" value="Cert management" style="curved=1;startArrow=none;endArrow=block;exitX=0.66;exitY=0;entryX=1;entryY=0.71;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-11" target="EC-11Qngtj6BY5DOfsQv-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2936" y="387" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-54" value="Image Pull (TCP 5000)" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.18;entryY=0;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-31" target="EC-11Qngtj6BY5DOfsQv-15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1224" y="827" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-55" value="Helm Chart Install (TCP 80/443)" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.9;entryY=0;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-32" target="EC-11Qngtj6BY5DOfsQv-15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1499" y="827" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-56" value="Package Updates (No External Access)" style="curved=1;startArrow=none;endArrow=block;exitX=0;exitY=0.91;entryX=0;entryY=0.31;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-33" target="EC-11Qngtj6BY5DOfsQv-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1286" y="148" />
+              <mxPoint x="1698" y="193" />
+              <mxPoint x="1698" y="239" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-57" value="Package Updates" style="curved=1;startArrow=none;endArrow=block;exitX=1;exitY=0.97;entryX=0.85;entryY=0;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-33" target="EC-11Qngtj6BY5DOfsQv-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1772" y="148" />
+              <mxPoint x="3144" y="193" />
+              <mxPoint x="3144" y="535" />
+              <mxPoint x="3027" y="572" />
+              <mxPoint x="3027" y="608" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-58" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0;exitY=0.71;entryX=0;entryY=0.45;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-10" target="EC-11Qngtj6BY5DOfsQv-36">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1616" y="387" />
+              <mxPoint x="1616" y="535" />
+              <mxPoint x="1009" y="572" />
+              <mxPoint x="1009" y="1174" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-59" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0.78;exitY=1;entryX=1;entryY=0.24;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-11" target="EC-11Qngtj6BY5DOfsQv-36">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2963" y="535" />
+              <mxPoint x="3251" y="572" />
+              <mxPoint x="3251" y="1174" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-60" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1.01;entryX=1;entryY=0.37;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-19" target="EC-11Qngtj6BY5DOfsQv-36">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="3656" y="1174" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-61" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0.19;exitY=1;entryX=0;entryY=0.27;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-26" target="EC-11Qngtj6BY5DOfsQv-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2345" y="148" />
+              <mxPoint x="1795" y="193" />
+              <mxPoint x="1795" y="239" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-62" value="" style="curved=1;startArrow=none;endArrow=block;exitX=1;exitY=0.61;entryX=0.97;entryY=0;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-26" target="EC-11Qngtj6BY5DOfsQv-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="3345" y="148" />
+              <mxPoint x="3345" y="535" />
+              <mxPoint x="3078" y="572" />
+              <mxPoint x="3078" y="608" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-63" value="" style="curved=1;startArrow=none;endArrow=block;exitX=1;exitY=0.83;entryX=1;entryY=0.02;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-27" target="EC-11Qngtj6BY5DOfsQv-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="3466" y="148" />
+              <mxPoint x="3466" y="535" />
+              <mxPoint x="3098" y="572" />
+              <mxPoint x="3098" y="608" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-64" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0;exitY=0.98;entryX=0.72;entryY=-0.01;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-27" target="EC-11Qngtj6BY5DOfsQv-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2925" y="148" />
+              <mxPoint x="2375" y="193" />
+              <mxPoint x="2375" y="239" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-65" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-28" target="EC-11Qngtj6BY5DOfsQv-31">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2204" y="148" />
+              <mxPoint x="1092" y="193" />
+              <mxPoint x="1092" y="535" />
+              <mxPoint x="1224" y="572" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-66" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0.03;exitY=1;entryX=1;entryY=0.06;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-29" target="EC-11Qngtj6BY5DOfsQv-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="3486" y="148" />
+              <mxPoint x="3486" y="535" />
+              <mxPoint x="3118" y="572" />
+              <mxPoint x="3118" y="608" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-67" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0;exitY=0.93;entryX=1;entryY=0.26;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-30" target="EC-11Qngtj6BY5DOfsQv-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="3066" y="148" />
+              <mxPoint x="2740" y="193" />
+              <mxPoint x="2740" y="239" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-68" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0.92;exitY=1;entryX=1;entryY=0.09;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-30" target="EC-11Qngtj6BY5DOfsQv-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="3657" y="148" />
+              <mxPoint x="3657" y="535" />
+              <mxPoint x="3138" y="572" />
+              <mxPoint x="3138" y="608" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-69" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0;exitY=0.95;entryX=0.51;entryY=0;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-30" target="EC-11Qngtj6BY5DOfsQv-11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="3086" y="148" />
+              <mxPoint x="2850" y="193" />
+              <mxPoint x="2850" y="387" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-70" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0.39;exitY=0.01;entryX=0;entryY=0.7;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-25" target="EC-11Qngtj6BY5DOfsQv-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="107" y="996" />
+              <mxPoint x="107" y="572" />
+              <mxPoint x="1596" y="535" />
+              <mxPoint x="1596" y="387" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-71" value="" style="curved=1;startArrow=none;endArrow=block;exitX=1;exitY=0.39;entryX=0.52;entryY=1;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-25" target="EC-11Qngtj6BY5DOfsQv-15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1360" y="996" />
+              <mxPoint x="1360" y="951" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-72" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0.67;exitY=1;entryX=0;entryY=0.46;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-22" target="EC-11Qngtj6BY5DOfsQv-12">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="359" y="535" />
+              <mxPoint x="359" y="608" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-73" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0.62;exitY=1;entryX=0;entryY=0.4;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-22" target="EC-11Qngtj6BY5DOfsQv-15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="339" y="535" />
+              <mxPoint x="339" y="827" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EC-11Qngtj6BY5DOfsQv-74" value="" style="curved=1;startArrow=none;endArrow=block;exitX=0.66;exitY=1;entryX=0;entryY=0.44;rounded=0;" edge="1" parent="1" source="EC-11Qngtj6BY5DOfsQv-23" target="EC-11Qngtj6BY5DOfsQv-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="277" y="148" />
+              <mxPoint x="277" y="239" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
