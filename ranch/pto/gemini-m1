@@ -1,0 +1,155 @@
+%% Mermaid Diagram for Air-Gapped RKE2 HA Cluster LLD
+graph TD
+    %% Define Subgraphs (Zones) and Colors
+    subgraph ZONE_A_MGMT [Management/Perimeter Zone]
+        direction LR
+        BASTION
+        F5_LB
+        FW_PERIMETER
+    end
+
+    subgraph ZONE_B_RKE2_CP
+        direction LR
+        CP1(RKE2 Server 1 - etcd Leader)
+        CP2(RKE2 Server 2)
+        CP3(RKE2 Server 3)
+    end
+
+    subgraph ZONE_C_RKE2_WORKER
+        direction LR
+        W1(RKE2 Agent 1 - Cilium / Longhorn Node)
+        W2(RKE2 Agent 2 - Cilium / Longhorn Node)
+        W3(RKE2 Agent 3 - Cilium / Longhorn Node)
+    end
+
+    subgraph ZONE_D_SECURE_APPS
+        direction LR
+        NGINX_INGRESS{NGINX Ingress Controller}
+        JENKINS(Jenkins Controller/Agents)
+        PROMETHEUS(Prometheus + Thanos Sidecar)
+        THANOS_QUERY(Thanos Querier/Store Gateway)
+        RANCHER(Rancher Manager)
+    end
+
+    subgraph ZONE_E_INFRA_SERVICES
+        direction LR
+        ARTIFACTORY(JFrog Artifactory Registry:8081/8082)
+        MINIO(MinIO Object Store:9000/9090 - Thanos Backend)
+    end
+
+    subgraph ZONE_F_EXTERNAL_SEC
+        direction LR
+        VAULT(HashiCorp Vault HA:8200)
+        AD_LDAP(AD/LDAP Server:636)
+        VENAFI(Venafi TPP:443)
+    end
+
+    %% Define Component Styles
+    style F5_LB fill:#D32F2F,stroke:#333,stroke-width:2px
+    style BASTION fill:#9E9E9E,stroke:#333
+    style FW_PERIMETER fill:#D32F2F,stroke:#333,stroke-width:2px
+
+    style CP1 fill:#00796B,stroke:#004D40
+    style CP2 fill:#00796B,stroke:#004D40
+    style CP3 fill:#00796B,stroke:#004D40
+
+    style W1 fill:#1976D2,stroke:#0D47A1
+    style W2 fill:#1976D2,stroke:#0D47A1
+    style W3 fill:#1976D2,stroke:#0D47A1
+
+    style ARTIFACTORY fill:#1976D2
+    style MINIO fill:#FFC107
+    style JENKINS fill:#1976D2
+    style PROMETHEUS fill:#8BC34A
+    style THANOS_QUERY fill:#8BC34A
+    style RANCHER fill:#00796B
+
+    style VAULT fill:#673AB7
+    style AD_LDAP fill:#673AB7
+    style VENAFI fill:#673AB7
+
+    %% Flows from Management Zone
+    BASTION --> F5_LB: 6443/TCP (API Access)
+    F5_LB -- CP_VIP:6443/TCP --> CP1 & CP2 & CP3
+    F5_LB -- CP_VIP:9345/TCP --> CP1 & CP2 & CP3
+    F5_LB -- APP_VIP:443/TCP, 80/TCP --> W1 & W2 & W3: 30000-32767/TCP (NodePort)
+
+    %% RKE2 Core Communication and HA
+    CP1 <--> CP2: 2379-2381/TCP (etcd Peer/Client)
+    CP1 <--> CP3: 2379-2381/TCP (etcd Peer/Client)
+    CP2 <--> CP3: 2379-2381/TCP (etcd Peer/Client)
+
+    CP1 -- 6443, 9345/TCP --> W1 & W2 & W3
+    W1 -- 6443, 9345/TCP --> F5_LB (Registration)
+
+    %% Internal Services and RKE2 Dependencies
+    W1 -- Cilium 4240/TCP --> W2 & W3
+    W1 -- Kubelet 10250/TCP --> W2 & W3
+    W1 -- iSCSI 3260/TCP --> W2 & W3 (Longhorn Data Path)
+
+    %% Application and CI/CD Flows
+    NGINX_INGRESS -- Longhorn PVC --> W1
+    JENKINS -- Longhorn PVC --> W1
+    PROMETHEUS -- Longhorn PVC --> W1
+
+    RANCHER --> CP1: 6443/TCP (K8s API)
+    RANCHER --> NGINX_INGRESS: 443/TCP
+
+    %% Internal Infrastructure Access (Air-Gap Constraint)
+    W1 & W2 & W3 --> ARTIFACTORY: 8081/8082 (Image Pulls)
+    JENKINS --> ARTIFACTORY: 8081/8082 (Artifact Management)
+
+    %% Observability Flows
+    PROMETHEUS -- 10250/TCP scrape --> W1 & W2 & W3 (Kubelet Metrics)
+    THANOS_QUERY -- gRPC 10901/TCP --> PROMETHEUS (Sidecar)
+    THANOS_QUERY -- gRPC 10901/TCP --> THANOS_QUERY (Store Gateway)
+    THANOS_QUERY --> MINIO (S3 API)
+
+    %% Controlled Egress to External Security Services
+    subgraph Egress_Flows
+        style Egress_Flows fill:#F0F0F0,stroke:#333,stroke-dasharray: 5 5
+        RANCHER --> FW_PERIMETER: 636/TCP
+        JENKINS --> FW_PERIMETER: 8200/TCP
+        NGINX_INGRESS --> FW_PERIMETER: 443/TCP
+    end
+
+    FW_PERIMETER --> VAULT: 8200/TCP (Secrets API)
+    FW_PERIMETER --> AD_LDAP: 636/TCP (LDAPS Auth)
+    FW_PERIMETER --> VENAFI: 443/TCP (Cert API)
+
+    %% Flow Links
+    linkStyle 0 stroke:#66BB6A,stroke-width:2px,color:#66BB6A
+    linkStyle 1 stroke:#3F51B5,stroke-width:2px,color:#3F51B5
+    linkStyle 2 stroke:#3F51B5,stroke-width:2px,color:#3F51B5
+    linkStyle 3 stroke:#FF9800,stroke-width:2px,color:#FF9800
+    linkStyle 4 stroke:#4CAF50,stroke-width:2px,color:#4CAF50
+    linkStyle 5 stroke:#4CAF50,stroke-width:2px,color:#4CAF50
+    linkStyle 6 stroke:#4CAF50,stroke-width:2px,color:#4CAF50
+    linkStyle 7 stroke:#2196F3,stroke-width:2px,color:#2196F3
+    linkStyle 8 stroke:#9C27B0,stroke-width:2px,color:#9C27B0
+    linkStyle 9 stroke:#9C27B0,stroke-width:2px,color:#9C27B0
+    linkStyle 10 stroke:#9C27B0,stroke-width:2px,color:#9C27B0
+    linkStyle 11 stroke:#FF0000,stroke-width:2px,color:#FF0000
+    linkStyle 12 stroke:#FF0000,stroke-width:2px,color:#FF0000
+    linkStyle 13 stroke:#FF0000,stroke-width:2px,color:#FF0000
+
+    linkStyle 15 stroke:#4CAF50,stroke-width:2px,color:#4CAF50
+    linkStyle 16 stroke:#4CAF50,stroke-width:2px,color:#4CAF50
+    linkStyle 17 stroke:#4CAF50,stroke-width:2px,color:#4CAF50
+
+    linkStyle 18 stroke:#FF9800,stroke-width:2px,color:#FF9800
+    linkStyle 19 stroke:#FF9800,stroke-width:2px,color:#FF9800
+
+    linkStyle 20 stroke:#FF9800,stroke-width:2px,color:#FF9800
+    linkStyle 21 stroke:#FF9800,stroke-width:2px,color:#FF9800
+    linkStyle 22 stroke:#FF9800,stroke-width:2px,color:#FF9800
+
+    linkStyle 23 stroke:#FF9800,stroke-width:2px,color:#FF9800
+    linkStyle 24 stroke:#FF9800,stroke-width:2px,color:#FF9800
+
+    linkStyle 25 stroke:#00BCD4,stroke-width:2px,color:#00BCD4
+    linkStyle 26 stroke:#00BCD4,stroke-width:2px,color:#00BCD4
+
+    linkStyle 27 stroke:#8BC34A,stroke-width:2px,color:#8BC34A
+    linkStyle 28 stroke:#8BC34A,stroke-width:2px,color:#8BC34A
+    linkStyle 29 stroke:#8BC34A,stroke-width:2px,color:#8BC34A

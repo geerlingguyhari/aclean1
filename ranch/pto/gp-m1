@@ -1,0 +1,114 @@
+%% RKE2 air-gapped architecture (detailed, colored)
+%% paste into mermaid.live or supported Markdown to render
+flowchart TB
+  %% External / DMZ
+  subgraph EXTERNAL["External / DMZ (F5, Admin)"]
+    style EXTERNAL fill:#f6f9ff,stroke:#c7d2fe
+    F5[F5 LTM / VIPs<br/>TLS Termination\n(ports 80/443) ]:::f5
+    Admin[Admin Jumpbox\n(offline sync tooling)]:::admin
+    MirrorBox[Artifactory Mirror (JFrog)\n(air-gapped mirror)]:::artifactory
+  end
+
+  %% Load balancer -> ingress
+  F5 -->|HTTP/HTTPS (80/443)| NGINXIngress
+  F5 ---|Health checks| LBHealth[LB Health Checks]
+
+  %% Cluster
+  subgraph CLUSTER["RKE2 Cluster (Private Network)"]
+    style CLUSTER fill:#ffffff,stroke:#d1fae5
+    %% Control plane + etcd
+    subgraph CP["Control Plane (3 nodes)"]
+      style CP fill:#fffbeb,stroke:#f59e0b
+      CP1["CP-01\n(rke2-server)"]:::control
+      CP2["CP-02\n(rke2-server)"]:::control
+      CP3["CP-03\n(rke2-server)"]:::control
+    end
+
+    subgraph ETCD["etcd (HA)"]
+      style ETCD fill:#fff1f2,stroke:#ef4444
+      ETCD1["etcd-01\n(2379/2380)"]:::etcd
+      ETCD2["etcd-02\n(2379/2380)"]:::etcd
+      ETCD3["etcd-03\n(2379/2380)"]:::etcd
+    end
+
+    %% Workers and system
+    subgraph WORKERS["Worker Nodes (kubelets, pods)"]
+      style WORKERS fill:#f0f9ff,stroke:#0284c7
+      W1["worker-01"]:::worker
+      W2["worker-02"]:::worker
+      W3["worker-03"]:::worker
+      W4["worker-04"]:::worker
+    end
+
+    %% Cilium as CNI, host/network plane
+    Cilium["Cilium (BPF datapath)\nHubble observability"]:::cilium
+    %% Longhorn storage components
+    Longhorn["Longhorn + CSI\n(controllers + engines)"]:::longhorn
+    %% Ingress
+    NGINXIngress["NGINX Ingress Controller\n(NodePort/HostPort + Service)"]:::nginx
+    %% Secrets & CI/CD & registry
+    Vault["HashiCorp Vault (HA)\nAPI:8200 Raft:8201"]:::vault
+    Jenkins["Jenkins Controller\n(8080, agent ports)"]:::jenkins
+    Artifactory["JFrog Artifactory Mirror\n(8081/8082 internal)"]:::artifactory
+    %% Monitoring
+    Prometheus["Prometheus (9090) + Sidecar\nThanos Sidecar (10901/10902)"]:::prom
+    ThanosQuerier["Thanos Querier / Store Gateway\n(10904 / gRPC ports)"]:::thanos
+
+    %% Cluster internal links
+    CP1 --- ETCD1
+    CP2 --- ETCD2
+    CP3 --- ETCD3
+    CP1 -->|k8s API 6443| CP2
+    CP1 -->|k8s API 6443| CP3
+    CP2 -->|k8s API 6443| CP3
+
+    CP1 -->|kubelet 10250| W1
+    CP1 -->|kubelet 10250| W2
+    CP1 -->|kubelet 10250| W3
+    CP1 -->|kubelet 10250| W4
+
+    Cilium --- W1
+    Cilium --- W2
+    Cilium --- W3
+    Cilium --- W4
+    Cilium --- CP1
+
+    Longhorn --- W1
+    Longhorn --- W2
+    Longhorn --- W3
+    Longhorn --- W4
+
+    NGINXIngress --- W1
+    NGINXIngress --- W2
+    NGINXIngress --- W3
+    NGINXIngress -->|Cluster IP / NodePort| Prometheus
+
+    Vault --- CP1
+    Jenkins --- W1
+    Artifactory --- W2
+
+    Prometheus --> ThanosQuerier
+    ThanosQuerier ---|Object Storage (S3/MinIO)| Archive[(On-prem Object Store)]
+  end
+
+  %% External interactions
+  MirrorBox -->|Image mirror sync (air-gapped import)\nOCI pulls via private registry| Artifactory
+  Admin -->|SSH / API| CP1
+  Admin -->|SSH / API| Vault
+  F5 -->|80/443| NGINXIngress
+
+  %% Legend / styling
+  classDef control fill:#fff7ed,stroke:#f59e0b,stroke-width:1px;
+  classDef etcd fill:#fff1f2,stroke:#ef4444,stroke-width:1px;
+  classDef worker fill:#eef2ff,stroke:#6366f1,stroke-width:1px;
+  classDef cilium fill:#ecfeff,stroke:#06b6d4,stroke-width:1px;
+  classDef longhorn fill:#fff7ed,stroke:#a16207,stroke-width:1px;
+  classDef vault fill:#f3e8ff,stroke:#7c3aed,stroke-width:1px;
+  classDef nginx fill:#ecfccb,stroke:#65a30d,stroke-width:1px;
+  classDef prom fill:#fff1f2,stroke:#ef4444,stroke-width:1px;
+  classDef thanos fill:#f0f9ff,stroke:#0369a1,stroke-width:1px;
+  classDef jenkins fill:#fff7f6,stroke:#db2777,stroke-width:1px;
+  classDef artifactory fill:#fffaf0,stroke:#92400e,stroke-width:1px;
+  classDef f5 fill:#f0fdf4,stroke:#065f46,stroke-width:1px;
+  classDef admin fill:#f8fafc,stroke:#0f172a,stroke-width:1px;
+

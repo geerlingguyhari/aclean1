@@ -1,0 +1,144 @@
+flowchart TB
+
+subgraph CONTROLPLANEZONE
+    etcd1["etcd Node 1"]
+    etcd2["etcd Node 2"]
+    etcd3["etcd Node 3"]
+    cp1["Control Plane 1"]
+    cp2["Control Plane 2"]
+    cp3["Control Plane 3"]
+    RancherUI["Rancher Mgmt UI"]
+end
+
+subgraph WORKERZONE
+    worker1["Worker 1"]
+    worker2["Worker 2"]
+    workerN["Worker n"]
+end
+
+subgraph NETWORKZONE
+    cilium["Cilium CNI"]
+    f5["F5 Load Balancer"]
+    nginx["NGINX Ingress"]
+end
+
+subgraph VAULTZONE
+    vault["HashiCorp Vault"]
+end
+
+subgraph STORAGEZONE
+    longhorn["Longhorn Storage"]
+end
+
+subgraph MONITORINGZONE
+    prometheus["Prometheus"]
+    thanos["Thanos"]
+    grafana["Grafana"]
+end
+
+subgraph CICDZONE
+    jenkins["Jenkins CI/CD"]
+    artifactory["JFrog Registry"]
+end
+
+subgraph CERTMGMTZONE
+    certmanager["CertManager"]
+    venafi["Venafi PKI"]
+end
+
+subgraph BASTIONZONE
+    bastion["Bastion Host"]
+end
+
+subgraph AUTHDIRECTORY
+    ldap["LDAP/AD"]
+end
+
+subgraph AIRGAPSUPPORT
+    registry["Airgap Image Registry"]
+end
+
+etcd1 -- "2380,2379/tcp" --> etcd2
+etcd2 -- "2380,2379/tcp" --> etcd3
+cp1 -- "9345,6443/tcp" --> etcd1
+cp2 -- "9345,6443/tcp" --> etcd2
+cp3 -- "9345,6443/tcp" --> etcd3
+cp1 <--> cp2
+cp2 <--> cp3
+cp1 <--> cp3
+
+RancherUI -- "443/tcp" --> bastion
+bastion -- "Mgmt SSH/HTTPS" --> cp1
+bastion -- "LDAP Auth" --> ldap
+
+worker1 -- "9345,6443/tcp" --> cp1
+worker2 -- "9345,6443/tcp" --> cp2
+workerN -- "9345,6443/tcp" --> cp3
+
+cilium -- "PodNet,NetPolicy" --> worker1
+cilium -- "PodNet,NetPolicy" --> worker2
+cilium -- "PodNet,NetPolicy" --> workerN
+nginx -- "80/443" --> f5
+
+cp1 -- "8200/tcp" --> vault
+cp2 -- "8200/tcp" --> vault
+cp3 -- "8200/tcp" --> vault
+vault -- "Secrets API" --> worker1
+vault -- "Secrets API" --> RancherUI
+
+worker1 -- "9500,10000-10200/tcp" --> longhorn
+worker2 -- "9500,10000-10200/tcp" --> longhorn
+workerN -- "9500,10000-10200/tcp" --> longhorn
+
+prometheus -- "9090/tcp" --> grafana
+thanos -- "10901/tcp" --> prometheus
+grafana -- "Dash API" --> bastion
+
+jenkins -- "50000/8080/tcp" --> worker1
+artifactory -- "443/8081/tcp" --> jenkins
+artifactory -- "OCI Registry" --> workerN
+
+certmanager -- "Venafi REST" --> cp1
+certmanager --> RancherUI
+certmanager --> nginx
+certmanager --> worker1
+certmanager --> worker2
+certmanager --> workerN
+certmanager -- "PKI" --> venafi
+
+cp1 -- "389,636,3268,3269/tcp" --> ldap
+RancherUI -- "389,636/tcp" --> ldap
+worker1 -- "389/tcp" --> ldap
+
+registry -- "Images & Charts" --> artifactory
+registry -- "Cluster Images" --> cp1
+registry -- "Cluster Images" --> worker1
+registry -- "Cluster Images" --> RancherUI
+jenkins -- "Build Images" --> registry
+
+classDef etcd fill:#0077c2,stroke:#003d65;
+classDef cp fill:#0077c2,stroke:#273746;
+classDef worker fill:#2ecc40,stroke:#169c32;
+classDef network fill:#18a999,stroke:#11695d;
+classDef vault fill:#e67e22,stroke:#a04000;
+classDef storage fill:#a569bd,stroke:#512e5f;
+classDef monitor fill:#ffeb3b,stroke:#c9bc1f;
+classDef cicd fill:#c0392b,stroke:#922b21;
+classDef certmgmt fill:#858585,stroke:#444;
+classDef bastion fill:#0e375a,stroke:#0e1539;
+classDef ldap fill:#232323,stroke:#666;
+classDef registry fill:#ececec,stroke:#aaa;
+
+class etcd1,etcd2,etcd3 etcd;
+class cp1,cp2,cp3,RancherUI cp;
+class worker1,worker2,workerN worker;
+class cilium,f5,nginx network;
+class vault vault;
+class longhorn storage;
+class prometheus,thanos,grafana monitor;
+class jenkins,artifactory cicd;
+class certmanager,venafi certmgmt;
+class bastion bastion;
+class ldap ldap;
+class registry registry;
+

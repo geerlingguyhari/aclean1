@@ -1,0 +1,93 @@
+flowchart TD
+  %% Cluster Nodes
+  subgraph CP[Control Plane Nodes]
+    style CP fill:#f9f,stroke:#333,stroke-width:2px
+    CP1[Control Plane 1\netcd + rke2-server]
+    CP2[Control Plane 2\netcd + rke2-server]
+    CP3[Control Plane 3\netcd + rke2-server]
+  end
+
+  subgraph WK[Worker Nodes]
+    style WK fill:#bbf,stroke:#333,stroke-width:2px
+    W1[Worker Node 1\nrke2-agent]
+    W2[Worker Node 2\nrke2-agent]
+    W3[Worker Node 3\nrke2-agent]
+  end
+
+  %% Networking
+  subgraph NET[Networking]
+    style NET fill:#cfc,stroke:#333,stroke-width:2px
+    Cilium[Cilium CNI\nOverlay + BPF]
+    F5[F5 Load Balancer\nExternal Ingress]
+    NGINX[NGINX Ingress Controller]
+  end
+
+  %% Storage
+  subgraph STG[Storage]
+    style STG fill:#fcf,stroke:#333,stroke-width:2px
+    Longhorn[Longhorn\nDistributed Block Storage]
+  end
+
+  %% Secrets
+  subgraph SEC[Secrets]
+    style SEC fill:#ffc,stroke:#333,stroke-width:2px
+    Vault[HashiCorp Vault\nSecrets Management]
+  end
+
+  %% Monitoring
+  subgraph MON[Monitoring]
+    style MON fill:#eef,stroke:#333,stroke-width:2px
+    Prometheus[Prometheus\nMetrics Collection]
+    Thanos[Thanos\nLong-term Storage]
+  end
+
+  %% CI/CD
+  subgraph CICD[CI/CD]
+    style CICD fill:#ddf,stroke:#333,stroke-width:2px
+    Jenkins[Jenkins\nCI/CD Pipelines]
+  end
+
+  %% Registry
+  subgraph REG[Image Registry]
+    style REG fill:#ffd,stroke:#333,stroke-width:2px
+    JFrog[JFrog Artifactory\nPrivate Registry]
+  end
+
+  %% Connections
+  F5 --> NGINX
+  NGINX --> CP1 & CP2 & CP3
+  CP1 --> etcd1[(etcd)]
+  CP2 --> etcd2[(etcd)]
+  CP3 --> etcd3[(etcd)]
+  CP1 --> Cilium
+  CP2 --> Cilium
+  CP3 --> Cilium
+  W1 --> Cilium
+  W2 --> Cilium
+  W3 --> Cilium
+  W1 --> Longhorn
+  W2 --> Longhorn
+  W3 --> Longhorn
+  CP1 --> Vault
+  CP2 --> Vault
+  CP3 --> Vault
+  Prometheus --> Thanos
+  Prometheus --> CP1 & CP2 & CP3
+  Jenkins --> CP1 & CP2 & CP3
+  Jenkins --> JFrog
+  JFrog --> CP1 & CP2 & CP3
+  JFrog --> W1 & W2 & W3
+
+  %% Air-Gap Boundary
+  subgraph AirGap[Air-Gapped Boundary]
+    style AirGap stroke:#000,stroke-width:4px
+    CP
+    WK
+    NET
+    STG
+    SEC
+    MON
+    CICD
+    REG
+  end
+

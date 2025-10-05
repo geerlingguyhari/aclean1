@@ -1,0 +1,102 @@
+flowchart TB
+%% Legend: Zone Colors
+%% - #3399ff: Control Plane
+%% - #1abc9c: Network/CNI
+%% - #e67e22: Secrets/PKI
+%% - #a569bd: Storage
+%% - #f5b041: Monitoring/Observability
+%% - #e74c3c: CI/CD & Registry
+%% - #34495e: Firewall Boundary
+%% - #f4d03f: Internal Operator/Lifecycle
+
+subgraph "CONTROL PLANE ZONE"
+    style CONTROL PLANE ZONE fill:#3399ff,stroke:#2c3e50,stroke-width:2px
+    api[K8s API Server]:::control
+    etcd[etcd Cluster]:::control
+    rancher[Rancher GUI]:::control
+end
+
+subgraph "NETWORK ZONE"
+    style NETWORK ZONE fill:#1abc9c,stroke:#145a32,stroke-width:2px
+    cilium[Cilium CNI\n(L3-L7)]:::network
+    f5[F5 Load Balancer]:::network
+    nginx[NGINX Ingress]:::network
+end
+
+subgraph "SECRETS & PKI ZONE"
+    style SECRETS & PKI ZONE fill:#e67e22,stroke:#943126,stroke-width:2px
+    vault[HashiCorp Vault\n(KMS/Secrets)]:::secrets
+    pki[PTO PKI Root CA]:::secrets
+end
+
+subgraph "STORAGE ZONE"
+    style STORAGE ZONE fill:#a569bd,stroke:#512e5f,stroke-width:2px
+    longhorn[Longhorn Cluster\n(CSI)]:::storage
+end
+
+subgraph "MONITORING ZONE"
+    style MONITORING ZONE fill:#f5b041,stroke:#b7950b,stroke-width:2px
+    prometheus[Prometheus Server]:::monitor
+    thanos[Thanos Gateway/Query]:::monitor
+    grafana[Grafana Dashboards]:::monitor
+end
+
+subgraph "CI/CD ZONE"
+    style CI/CD ZONE fill:#e74c3c,stroke:#512e5f,stroke-width:2px
+    jenkins[Jenkins CI/CD]:::cicd
+    artifactory[JFrog Artifactory\n(Image Registry)]:::cicd
+end
+
+subgraph "FIREWALL/BOUNDARY"
+    style FIREWALL/BOUNDARY fill:#34495e,stroke:#e67e22,stroke-dasharray:5 3,stroke-width:3px
+    fwdatacenter[Physical/Virtual Firewall]:::fw
+end
+
+subgraph "OPERATOR ZONE"
+    style OPERATOR ZONE fill:#f4d03f,stroke:#154360,stroke-width:2px
+    operator[Cluster Operator Console]:::operator
+end
+
+%% Connectivity & Flows (with Ports)
+api -- "K8s (6443/tcp, 9345/tcp)" --> rancher
+api -- "Pod/Storage API" --> longhorn
+api -- "Secrets/PKI (8200/tcp)" --> vault
+api -- "Monitoring API" --> prometheus
+
+rancher -- "Management UX (443/tcp)" --> fwdatacenter
+nginx -- "Ingress (443/tcp, 80/tcp)" --> f5
+
+api -- "CNI API (NetworkPolicy)" --> cilium
+cilium -- "Pod Networking + Segmentation" --> nginx
+
+longhorn -- "CSI Storage Traffic (9500/tcp,10000-10200/tcp)" --> STORAGE ZONE
+prometheus -- "Metrics (9090/tcp)" --> grafana
+thanos -- "Long-term Store (10901/tcp)" --> prometheus
+grafana -- "Dash (3000/tcp)" --> operator
+
+jenkins -- "CI (8080/tcp,50000/tcp)" --> api
+artifactory -- "Images (8081/tcp,443/tcp,80/tcp)" --> jenkins
+artifactory -- "OCI Mirror Pull" --> api
+vault -- "PKI KMS (8200/tcp)" --> operator
+
+fwdatacenter -- "Zone/Segment Firewall: \nOnly Required Ports Allowed" -- fwboundary --> CONTROL PLANE ZONE
+fwdatacenter -- fwboundary --> NETWORK ZONE
+fwdatacenter -- fwboundary --> STORAGE ZONE
+fwdatacenter -- fwboundary --> MONITORING ZONE
+fwdatacenter -- fwboundary --> CI/CD ZONE
+fwdatacenter -- fwboundary --> SECRETS & PKI ZONE
+
+operator -- "Management access via jump host only" --> rancher
+
+%% Policy/Segmentation Notation
+classDef control fill:#3399ff,stroke:#283747;
+classDef network fill:#1abc9c,stroke:#0e6251;
+classDef secrets fill:#e67e22,stroke:#a04000;
+classDef storage fill:#a569bd,stroke:#512e5f;
+classDef monitor fill:#f5b041,stroke:#b7950b;
+classDef cicd fill:#e74c3c,stroke:#512e5f;
+classDef fw fill:#34495e,stroke:#e67e22,stroke-width:2px,stroke-dasharray:5 3;
+classDef operator fill:#f4d03f,stroke:#154360;
+
+%% End Mermaid Enhanced Diagram
+

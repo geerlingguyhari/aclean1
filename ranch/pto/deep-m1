@@ -1,0 +1,207 @@
+graph TB
+    %% Color Definitions
+    classDef controlPlane fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef workerNode fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef infrastructure fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    classDef security fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef storage fill:#e8eaf6,stroke:#283593,stroke-width:2px
+    classDef monitoring fill:#e0f2f1,stroke:#004d40,stroke-width:2px
+    classDef cicd fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef network fill:#fff8e1,stroke:#ff6f00,stroke-width:2px
+
+    %% External Network (Internet)
+    INTERNET[("Internet<br/>Limited Access")]:::network
+    
+    %% Bastion Host & Security Layer
+    subgraph "Security & Access Layer"
+        BASTION[Bastion Host<br/>SSH Jump Server<br/>VPN Gateway]:::security
+        FIREWALL[Firewall<br/>Port Filtering<br/>Network Policies]:::security
+        AD[Active Directory<br/>LDAP Authentication]:::security
+        
+        BASTION --> FIREWALL
+        FIREWALL --> AD
+    end
+
+    %% Load Balancer
+    F5_LB[F5 Load Balancer<br/>VIP: 443, 80<br/>SSL Termination]:::network
+
+    %% Control Plane Nodes
+    subgraph "RKE2 Control Plane (High Availability)"
+        CP1[RKE2 Control Plane 1<br/>etcd Member<br/>API Server<br/>Controller Manager<br/>Scheduler]:::controlPlane
+        CP2[RKE2 Control Plane 2<br/>etcd Member<br/>API Server<br/>Controller Manager<br/>Scheduler]:::controlPlane
+        CP3[RKE2 Control Plane 3<br/>etcd Member<br/>API Server<br/>Controller Manager<br/>Scheduler]:::controlPlane
+        
+        CP1 -.->|etcd Peer<br/>2380| CP2
+        CP2 -.->|etcd Peer<br/>2380| CP3
+        CP3 -.->|etcd Peer<br/>2380| CP1
+    end
+
+    %% Worker Nodes
+    subgraph "RKE2 Worker Nodes"
+        W1[RKE2 Worker 1<br/>Kubelet<br/>Kube-proxy<br/>Pods]:::workerNode
+        W2[RKE2 Worker 2<br/>Kubelet<br/>Kube-proxy<br/>Pods]:::workerNode
+        W3[RKE2 Worker 3<br/>Kubelet<br/>Kube-proxy<br/>Pods]:::workerNode
+        W4[RKE2 Worker N<br/>Kubelet<br/>Kube-proxy<br/>Pods]:::workerNode
+    end
+
+    %% Network Plugin
+    subgraph "CNI - Cilium Network Plugin"
+        CILIUM_AGENT[Cilium Agent<br/>eBPF-based Networking<br/>Network Policies<br/>Service Mesh]:::network
+        CILIUM_OPERATOR[Cilium Operator<br/>IPAM<br/>Node Discovery]:::network
+        HUBBLE[Hubble<br/>Network Observability<br/>Service Map]:::network
+    end
+
+    %% Storage Layer
+    subgraph "Storage - Longhorn"
+        LH_MANAGER[Longhorn Manager<br/>Volume Management]:::storage
+        LH_ENGINE[Longhorn Engine<br/>Block Storage]:::storage
+        LH_UI[Longhorn UI<br/>Dashboard]:::storage
+        LH_BACKUP[Longhorn Backup<br/>S3 Compatible]:::storage
+    end
+
+    %% Secret Management
+    subgraph "Secret Management - HashiCorp Vault"
+        VAULT_SERVER[Vault Server<br/>Secrets Engine<br/>Transit]:::security
+        VAULT_AGENT[Vault Agent<br/>Auto-auth<br/>Templates]:::security
+        VAULT_UI[Vault UI<br/>Management Console]:::security
+    end
+
+    %% Monitoring & Observability
+    subgraph "Monitoring - Prometheus & Thanos"
+        PROMETHEUS[Prometheus Server<br/>Metrics Collection]:::monitoring
+        THANOS_SIDEcar[Thanos Sidecar<br/>Object Storage]:::monitoring
+        THANOS_QUERY[Thanos Query<br/>Federated Query]:::monitoring
+        GRAFANA[Grafana<br/>Dashboards]:::monitoring
+        ALERT_MANAGER[Alert Manager<br/>Notifications]:::monitoring
+    end
+
+    %% CI/CD Pipeline
+    subgraph "CI/CD - Jenkins"
+        JENKINS_MASTER[Jenkins Master<br/>Pipeline Controller]:::cicd
+        JENKINS_AGENT[Jenkins Agents<br/>Kubernetes Pods]:::cicd
+        JENKINS_UI[Jenkins UI<br/>Dashboard]:::cicd
+    end
+
+    %% Artifact Management
+    subgraph "Artifact Repository - JFrog Artifactory"
+        ARTIFACTORY[Artifactory<br/>Docker Registry<br/>Helm Charts<br/>Maven Repo]:::cicd
+        MIRROR[Mirror Registry<br/>Air-gapped Images<br/>Local Cache]:::cicd
+    end
+
+    %% Certificate Management
+    subgraph "Certificate Management"
+        CERT_MANAGER[Cert-Manager<br/>K8s Certificate Controller]:::security
+        VENAFI[Venafi Integration<br/>Enterprise PKI]:::security
+        CA[Certificate Authority<br/>TLS Certificates]:::security
+    end
+
+    %% Ingress Controller
+    subgraph "Ingress - NGINX with F5 Integration"
+        NGINX_INGRESS[NGINX Ingress<br/>Controller<br/>Load Balancing]:::network
+        INGRESS_RES[Ingress Resources<br/>Routing Rules]:::network
+    end
+
+    %% Network Flow Connections
+    %% External Access
+    INTERNET --> FIREWALL
+    FIREWALL --> BASTION
+    BASTION --> F5_LB
+
+    %% Load Balancer to Control Plane
+    F5_LB --> CP1
+    F5_LB --> CP2
+    F5_LB --> CP3
+
+    %% Control Plane to Workers
+    CP1 --> W1
+    CP1 --> W2
+    CP1 --> W3
+    CP1 --> W4
+    CP2 --> W1
+    CP2 --> W2
+    CP2 --> W3
+    CP2 --> W4
+    CP3 --> W1
+    CP3 --> W2
+    CP3 --> W3
+    CP3 --> W4
+
+    %% Component Integrations
+    W1 --> CILIUM_AGENT
+    W2 --> CILIUM_AGENT
+    W3 --> CILIUM_AGENT
+    W4 --> CILIUM_AGENT
+    
+    W1 --> LH_ENGINE
+    W2 --> LH_ENGINE
+    W3 --> LH_ENGINE
+    W4 --> LH_ENGINE
+    
+    W1 --> VAULT_AGENT
+    W2 --> VAULT_AGENT
+    W3 --> VAULT_AGENT
+    W4 --> VAULT_AGENT
+
+    %% Monitoring Integration
+    PROMETHEUS --> W1
+    PROMETHEUS --> W2
+    PROMETHEUS --> W3
+    PROMETHEUS --> W4
+    PROMETHEUS --> CP1
+    PROMETHEUS --> CP2
+    PROMETHEUS --> CP3
+
+    %% CI/CD Integration
+    JENKINS_AGENT --> ARTIFACTORY
+    JENKINS_AGENT --> W1
+    JENKINS_AGENT --> W2
+    JENKINS_AGENT --> W3
+    JENKINS_AGENT --> W4
+
+    %% Certificate Management Integration
+    CERT_MANAGER --> VENAFI
+    CERT_MANAGER --> CA
+    NGINX_INGRESS --> CERT_MANAGER
+
+    %% Authentication Integration
+    CP1 --> AD
+    CP2 --> AD
+    CP3 --> AD
+    VAULT_SERVER --> AD
+    JENKINS_MASTER --> AD
+
+    %% Critical Ports & Protocols
+    linkStyle 0 stroke:#ff6f00,stroke-width:2px,stroke-dasharray: 5 5
+    linkStyle 1 stroke:#ff6f00,stroke-width:2px,stroke-dasharray: 5 5
+    linkStyle 2 stroke:#ff6f00,stroke-width:2px,stroke-dasharray: 5 5
+
+    %% Firewall Rules Annotation
+    subgraph "Critical Firewall Rules & Ports"
+        FW_RULES["
+        • 6443 - Kubernetes API
+        • 2379-2380 - etcd client/server
+        • 10250 - Kubelet API
+        • 8472 - Cilium VXLAN
+        • 4240 - Cilium Health
+        • 9090 - Prometheus
+        • 3000 - Grafana
+        • 8080 - Jenkins
+        • 8081 - Artifactory
+        • 8200 - Vault
+        • 80/443 - Ingress
+        • 22 - SSH (Bastion)
+        "]:::security
+    end
+
+    %% Air-gapped Specific Components
+    subgraph "Air-gapped Environment Features"
+        AIRGAP_FEATURES["
+        • Local Image Registry (Artifactory)
+        • Internal Certificate Authority
+        • No Direct Internet Access
+        • Proxy for Limited External Access
+        • Local Package Mirrors
+        • Offline Documentation
+        • Air-gapped Security Scans
+        "]:::security
+    end
